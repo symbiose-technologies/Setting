@@ -22,6 +22,8 @@ public struct SettingPage: Setting {
     public var previewConfiguration = PreviewConfiguration()
     @SettingBuilder public var tuple: SettingTupleView
 
+    public var skipScrollView: Bool
+    
     public init(
         id: AnyHashable? = nil,
         title: String,
@@ -31,6 +33,7 @@ public struct SettingPage: Setting {
         backgroundColor: Color? = nil,
         navigationTitleDisplayMode: SettingPage.NavigationTitleDisplayMode = NavigationTitleDisplayMode.automatic,
         previewConfiguration: SettingPage.PreviewConfiguration = PreviewConfiguration(),
+        skipScrollView: Bool = false,
         @SettingBuilder tuple: () -> SettingTupleView
     ) {
         self.id = id
@@ -42,6 +45,8 @@ public struct SettingPage: Setting {
         self.navigationTitleDisplayMode = navigationTitleDisplayMode
         self.previewConfiguration = previewConfiguration
         self.tuple = tuple()
+        self.skipScrollView = skipScrollView
+    
     }
 
     public struct PreviewConfiguration {
@@ -109,6 +114,7 @@ struct SettingPageView<Content>: View where Content: View {
     var backgroundColor: Color?
     var navigationTitleDisplayMode = SettingPage.NavigationTitleDisplayMode.inline
     var isInitialPage = false
+    var skipScrollView: Bool = false
     @ViewBuilder var content: Content
 
     var body: some View {
@@ -138,28 +144,39 @@ struct SettingPageView<Content>: View where Content: View {
 
     @ViewBuilder var main: some View {
         if #available(iOS 16.0, macOS 13.0, *) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: spacing) {
-                    content
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, verticalPadding)
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .background(backgroundColor ?? settingBackgroundColor)
-            .navigationTitle(title)
+            contentWithConditionalScrollView
+                .scrollDismissesKeyboard(.interactively)
+                .background(backgroundColor ?? settingBackgroundColor)
+                .navigationTitle(title)
         } else {
-            ScrollView {
-                VStack(alignment: .leading, spacing: spacing) {
-                    content
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, verticalPadding)
-            }
-            .background(backgroundColor ?? settingBackgroundColor)
-            .navigationTitle(title)
+            contentWithConditionalScrollView
+                .background(backgroundColor ?? settingBackgroundColor)
+                .navigationTitle(title)
         }
     }
+    
+    @ViewBuilder
+    var contentWithConditionalScrollView: some View {
+        if self.skipScrollView {
+            coreContent
+        } else {
+            ScrollView {
+                coreContent
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var coreContent: some View {
+        VStack(alignment: .leading, spacing: spacing) {
+            content
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, verticalPadding)
+    }
+    
+    
+    
 }
 
 public struct SettingPagePreviewView: View {

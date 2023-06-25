@@ -121,12 +121,16 @@ public struct SettingStack: View {
         }
         .environmentObject(settingViewModel)
         .onAppear {
-            let paths = settingPage.generatePaths()
-            settingViewModel.paths = paths
+            if isSearchable {
+                let paths = settingPage.generatePaths()
+                settingViewModel.paths = paths
+            }
         }
         .onReceive(settingViewModel.regeneratePaths) { _ in
-            let paths = settingPage.generatePaths()
-            settingViewModel.paths = paths
+            if isSearchable {
+                let paths = settingPage.generatePaths()
+                settingViewModel.paths = paths
+            }
         }
     }
 }
