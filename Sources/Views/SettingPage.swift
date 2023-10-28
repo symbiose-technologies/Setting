@@ -119,7 +119,6 @@ struct SettingPageView<Content>: View where Content: View {
 
     var body: some View {
         #if os(iOS)
-
         let navigationBarTitleDisplayMode: NavigationBarItem.TitleDisplayMode = {
             switch navigationTitleDisplayMode {
             case .automatic:

@@ -51,11 +51,13 @@ public struct SettingStack: View {
     public init(
         isSearchable: Bool = true,
         embedInNavigationStack: Bool = true,
+        embedInScrollView: Bool = true,
         page: @escaping () -> SettingPage
     ) {
         self.isSearchable = isSearchable
         self.embedInNavigationStack = embedInNavigationStack
         self.page = page
+        self.shouldEmbedInScrollView = embedInScrollView
     }
 
     /**
@@ -70,6 +72,7 @@ public struct SettingStack: View {
         isSearchable: Bool,
         settingViewModel: SettingViewModel,
         embedInNavigationStack: Bool = true,
+        embedInScrollView: Bool = true,
         page: @escaping () -> SettingPage,
         @ViewBuilder customNoResultsView: @escaping () -> Content
     ) where Content: View {
@@ -77,9 +80,12 @@ public struct SettingStack: View {
         self.embedInNavigationStack = embedInNavigationStack
         self.isSearchable = isSearchable
         self.page = page
+        self.shouldEmbedInScrollView = embedInScrollView
         self.customNoResultsView = AnyView(customNoResultsView())
     }
 
+    let shouldEmbedInScrollView: Bool
+    
     public var body: some View {
         if !embedInNavigationStack {
             main
@@ -93,10 +99,17 @@ public struct SettingStack: View {
             }
         }
     }
-
+    
+    var corePage: SettingPage {
+        var p = page()
+        p.skipScrollView = !shouldEmbedInScrollView
+        return p
+    }
+    
     @ViewBuilder var main: some View {
-        let settingPage = page()
-
+//        let settingPage = page()
+        let settingPage = corePage
+        
         VStack {
             if settingViewModel.searchText.isEmpty {
                 SettingView(setting: settingPage, isInitialPage: true, isPagePreview: false)
